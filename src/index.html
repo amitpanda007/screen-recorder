@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>⚡ Electron Screen Recorder ⚡</title>
+    <title>⚡ IQVIA Screen Recorder ⚡</title>
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css"
@@ -11,7 +11,7 @@
     <script defer src="render.js"></script>
   </head>
   <body class="content">
-    <h1>⚡ Electron Screen Recorder ⚡</h1>
+    <h1>⚡ IQVIA Screen Recorder ⚡</h1>
 
     <video></video>
     <canvas></canvas>
@@ -20,9 +20,16 @@
     <button id="stopBtn" class="button is-warning">Stop</button>
 
     <hr />
+    <div id="previewHeader">
+      <h2>Preview Screens</h2>
+      <button id="refBtn" class="button is-primary">Refresh</button>
+    </div>
+    
 
-    <button id="videoSelectBtn" class="button is-text">
+    <div id="preview"></div>
+
+    <!-- <button id="videoSelectBtn" class="button is-text">
       Choose a Video Source
-    </button>
+    </button> -->
   </body>
 </html>

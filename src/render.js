@@ -1,8 +1,9 @@
 const { desktopCapturer, remote } = require('electron');
+const { dialog, Menu } = remote;
 
 const { writeFile } = require('fs');
 
-const { dialog, Menu } = remote;
+// const { dialog, Menu } = remote;
 
 // Global state
 let mediaRecorder; // MediaRecorder instance to capture footage
@@ -23,6 +24,7 @@ canvasElement.addEventListener("mousemove", draw);
 canvasElement.addEventListener("mouseup", finishDrawing);
 
 function startDrawing(event) {
+  console.log(event);
   const {offsetX, offsetY} = event;
   console.log(`${offsetX},${offsetY}`);
   ctx.beginPath();
@@ -39,7 +41,7 @@ function draw(event) {
   if(!isDrawing) {
     return;
   }
-  ctx.lineWidth = 50;
+  ctx.lineWidth = 20;
   let {offsetX, offsetY} = event;
   ctx.lineTo(offsetX, offsetY);
   ctx.stroke();
@@ -53,39 +55,80 @@ startBtn.onclick = e => {
 };
 
 const stopBtn = document.getElementById('stopBtn');
-
 stopBtn.onclick = e => {
   mediaRecorder.stop();
   startBtn.classList.remove('is-danger');
   startBtn.innerText = 'Start';
 };
 
+const refBtn = document.getElementById('refBtn');
+refBtn.onclick = e => {
+  getVideoSources();
+}
+
+
+
 const videoSelectBtn = document.getElementById('videoSelectBtn');
-videoSelectBtn.onclick = getVideoSources;
+// videoSelectBtn.onclick = getVideoSources;
 
 // Get the available video sources
 async function getVideoSources() {
   const inputSources = await desktopCapturer.getSources({
-    types: ['window', 'screen']
+    types: ['window', 'screen'], thumbnailSize: {height: 1920, width: 1080}
+  });
+  console.log(inputSources);
+
+  // Clean children list
+  document.getElementById('preview').innerHTML = "";
+  inputSources.map(source => {
+    const imageBufferData = source.thumbnail.toDataURL();
+    const div = document.createElement('div');
+    const img = document.createElement('img');
+    img.className = "preview";
+    img.src = imageBufferData;
+    img.addEventListener("click", selectVideoPreview(source));
+
+    const p = document.createElement('p');
+    let sourceName = source.name;
+    if(source.name.includes(" - ")) {
+      sourceName = source.name.split(" - ");
+      sourceName = sourceName[sourceName.length - 1];
+    }
+     
+    p.innerText = sourceName;
+    p.className = "previewName";
+
+    div.appendChild(img);
+    div.appendChild(p);
+    document.getElementById('preview').appendChild(div); 
   });
 
-  const videoOptionsMenu = Menu.buildFromTemplate(
-    inputSources.map(source => {
-      return {
-        label: source.name,
-        click: () => selectSource(source)
-      };
-    })
-  );
 
+  // TODO: Old implementation based on menu pop up. See above for new implementation.
+  // const videoOptionsMenu = Menu.buildFromTemplate(
+  //   inputSources.map(source => {
+  //     return {
+  //       label: source.name,
+  //       click: () => selectSource(source)
+  //     };
+  //   })
+  // );
 
-  videoOptionsMenu.popup();
+  // videoOptionsMenu.popup();
+}
+// Call the functiont to start showing preview once the application launches.
+getVideoSources();
+
+function selectVideoPreview (source) {
+  return async function previewOnClick() {
+    await selectSource(source);
+  }
 }
 
 // Change the videoSource window to record
 async function selectSource(source) {
 
-  videoSelectBtn.innerText = source.name;
+  // videoSelectBtn.innerText = source.name;
 
   const constraints = {
     audio: false,
